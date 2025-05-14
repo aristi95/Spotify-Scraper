@@ -23,19 +23,26 @@ CREATE TABLE spotify_records (
     days_on_record INTEGER,
     UNIQUE(scraping_date, rank, song, artist)
 )
+```
 
 ## Cómo ejecutar
 ### 1. Clona el repositorio:
-git clone https://github.com/aristi95/spotify-scraper.git
-cd spotify-scraper
+```
+git clone https://github.com/aristi95/spotify-scraping.git
+cd spotify-scraping
+```
 
 ### 2. Instala las dependencias:
+```
 pip install -r requirements.txt
+```
 
 ### 3. Ejecuta el scraper:
+```
 python app.py
+```
 
-##Configuración
+## Configuración
 - Se ejecuta automáticamente cada día a las 15:00 (3 PM)
 
 - Gráficos generados:
