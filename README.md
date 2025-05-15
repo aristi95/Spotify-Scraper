@@ -28,8 +28,8 @@ CREATE TABLE spotify_records (
 ## Cómo ejecutar
 ### 1. Clona el repositorio:
 ```
-git clone https://github.com/aristi95/spotify-scraping.git
-cd spotify-scraping
+git clone https://github.com/aristi95/spotify-scraper.git
+cd spotify-scraper
 ```
 
 ### 2. Instala las dependencias:
