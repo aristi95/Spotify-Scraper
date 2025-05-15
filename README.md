@@ -43,7 +43,8 @@ python app.py
 ```
 
 ## Configuración
-- Se ejecuta automáticamente cada día a las 15:00 (3 PM)
+- Se ejecuta automáticamente cada día a las 15:00 (3 PM).
+También se puede configurar Task Scheduler de Windows para que ejecute el código cada cierto tiempo. 
 
 - Gráficos generados:
 
