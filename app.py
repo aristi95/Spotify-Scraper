@@ -12,12 +12,19 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta
 import schedule
 import time as tm
+import logging.handlers
 
 # Configuración de logging
+log_handler = logging.handlers.RotatingFileHandler(
+    'spotify_scraper.log',
+    maxBytes=5*1024*1024,  # 5 MB
+    backupCount=3
+)
 logging.basicConfig(
-    filename='spotify_scraper.log',
+    handlers=[log_handler],
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
 )
 
 # Configuración de la base de datos
@@ -219,18 +226,22 @@ def generate_daily_charts():
         conn = sqlite3.connect('spotify_records.db')
         today = datetime.now().strftime('%Y-%m-%d')
         
-        # --- Gráfico 1: Evolución de "Die With A Smile" ---
+               
+        # --- Gráfico 1: Evolución de una canción del ranking---      
+        # Canción
+        song = 'Die With A Smile'
+        
         # Consulta para obtener todos los datos de la canción
         query = """
         SELECT scraping_date, rank, streams, daily_average 
         FROM spotify_records 
-        WHERE song LIKE '%Die With A Smile%' 
+        WHERE song LIKE '%"""+song+"""%' 
         ORDER BY scraping_date
         """
         df = pd.read_sql(query, conn)
         
         if df.empty:
-            print("No se encontraron datos para 'Die With A Smile'")
+            print("No se encontraron datos para '"+song+"'")
             return
             
         # Convertir fechas
@@ -262,7 +273,7 @@ def generate_daily_charts():
                 linestyle=':', marker='^', label='Promedio Diario')
         
         # Añadir título y leyenda
-        plt.title('Evolución diaria de "Die With A Smile" en Spotify')
+        plt.title('Evolución diaria de "'+song+'" en Spotify')
         fig.tight_layout()
         
         # Combinar leyendas
@@ -272,7 +283,7 @@ def generate_daily_charts():
         
         # Guardar con fecha actual
         today = datetime.now().strftime('%Y-%m-%d')
-        filename = f'diewithasmile_evolution_{today}.png'
+        filename = f'song_evolution_{today}.png'
         plt.savefig(filename, dpi=120)
         plt.close()
 
