@@ -47,7 +47,7 @@ python app.py
 
 - Gráficos generados:
 
-diewithasmile_evolution_YYYY-MM-DD.png
+song_evolution_YYYY-MM-DD.png
 
 top10_songs_YYYY-MM-DD.png
 
@@ -56,7 +56,7 @@ top10_songs_YYYY-MM-DD.png
 ## Personalización
 Para cambiar la canción a monitorear:
 
-- Edita app.py y busca WHERE song LIKE '%Die With A Smile%'
+- Edita app.py y busca la variable 'song' en la función 'generate_daily_charts'
 
 - Reemplaza con el nombre de la canción que desees
 
