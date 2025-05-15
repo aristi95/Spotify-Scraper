@@ -14,6 +14,7 @@ from datetime import datetime, timedelta
 import schedule
 import time as tm
 import logging.handlers
+from pathlib import Path
 
 # Configuración de logging
 log_handler = logging.handlers.RotatingFileHandler(
@@ -227,7 +228,19 @@ def generate_daily_charts():
         conn = sqlite3.connect('spotify_records.db')
         current_datetime = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         
-        # --- Gráfico 1: Evolución de "Die With A Smile" ---
+        # --- Gráfico 1: Evolución de una canción del ranking ---
+
+        # Crear carpeta para guardar los gráficos
+        # Obtener el directorio actual del script
+        directorio_actual = Path(__file__).parent
+        # Nombre de la carpeta a crear
+        nombre_carpeta = "charts"
+        # Ruta completa de la nueva carpeta
+        ruta_carpeta = directorio_actual / nombre_carpeta
+        # Crear la carpeta si no existe
+        ruta_carpeta.mkdir(exist_ok=True)
+
+        #Canción
         song = 'Die With A Smile'
         
         # Consulta para obtener todos los datos de la canción
