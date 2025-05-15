@@ -1,3 +1,4 @@
+import os
 import requests
 from bs4 import BeautifulSoup
 import logging
@@ -224,68 +225,59 @@ def generate_daily_charts():
     """Genera ambos gráficos actualizados con datos del día"""
     try:
         conn = sqlite3.connect('spotify_records.db')
-        today = datetime.now().strftime('%Y-%m-%d')
+        current_datetime = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         
-               
-        # --- Gráfico 1: Evolución de una canción del ranking---      
-        # Canción
+        # --- Gráfico 1: Evolución de "Die With A Smile" ---
         song = 'Die With A Smile'
         
         # Consulta para obtener todos los datos de la canción
-        query = """
+        query = f"""
         SELECT scraping_date, rank, streams, daily_average 
         FROM spotify_records 
-        WHERE song LIKE '%"""+song+"""%' 
+        WHERE song LIKE '%{song}%' 
         ORDER BY scraping_date
         """
         df = pd.read_sql(query, conn)
         
-        if df.empty:
-            print("No se encontraron datos para '"+song+"'")
-            return
+        if not df.empty:
+            # 1. Guardar datos en CSV (append mode)
+            csv_filename = 'charts/song_evolution_data.csv'
+            df.to_csv(csv_filename, mode='a', header=not os.path.exists(csv_filename), index=False)
             
-        # Convertir fechas
-        df['scraping_date'] = pd.to_datetime(df['scraping_date'])
-        
-        # Crear gráfico con dos ejes y
-        fig, ax1 = plt.subplots(figsize=(12, 6))
-        
-        # Gráfico de ranking (eje y invertido)
-        color = 'tab:red'
-        ax1.set_xlabel('Fecha de seguimiento')
-        ax1.set_ylabel('Ranking', color=color)
-        ax1.plot(df['scraping_date'], df['rank'], color=color, marker='o', label='Ranking')
-        ax1.invert_yaxis()  # Para que #1 sea arriba
-        ax1.tick_params(axis='y', labelcolor=color)
-        ax1.grid(True, alpha=0.3)
-        
-        # Gráfico de streams (eje y secundario)
-        ax2 = ax1.twinx()  
-        color = 'tab:blue'
-        ax2.set_ylabel('Streams (miles de millones)', color=color)
-        ax2.plot(df['scraping_date'], df['streams']/1e9, color=color, 
-                linestyle='--', marker='s', label='Streams Totales')
-        ax2.tick_params(axis='y', labelcolor=color)
-        
-        # Gráfico de promedio diario
-        color = 'tab:green'
-        ax2.plot(df['scraping_date'], df['daily_average'], color=color, 
-                linestyle=':', marker='^', label='Promedio Diario')
-        
-        # Añadir título y leyenda
-        plt.title('Evolución diaria de "'+song+'" en Spotify')
-        fig.tight_layout()
-        
-        # Combinar leyendas
-        lines1, labels1 = ax1.get_legend_handles_labels()
-        lines2, labels2 = ax2.get_legend_handles_labels()
-        ax2.legend(lines1 + lines2, labels1 + labels2, loc='upper left')
-        
-        # Guardar con fecha actual
-        today = datetime.now().strftime('%Y-%m-%d')
-        filename = f'song_evolution_{today}.png'
-        plt.savefig(filename, dpi=120)
-        plt.close()
+            # 2. Procesar datos para el gráfico
+            df['scraping_date'] = pd.to_datetime(df['scraping_date'])
+            
+            # Crear gráfico
+            fig, ax1 = plt.subplots(figsize=(12, 6))
+            
+            # Gráfico de ranking
+            ax1.plot(df['scraping_date'], df['rank'], 'ro-', label='Ranking')
+            ax1.invert_yaxis()
+            ax1.set_xlabel('Fecha')
+            ax1.set_ylabel('Ranking', color='red')
+            ax1.tick_params(axis='y', labelcolor='red')
+            
+            # Gráfico de streams (eje secundario)
+            ax2 = ax1.twinx()
+            ax2.plot(df['scraping_date'], df['streams']/1e9, 'b--', label='Streams (B)')
+            ax2.plot(df['scraping_date'], df['daily_average']/1e6, 'g:', label='Avg. Diario (M)')
+            ax2.set_ylabel('Streams', color='blue')
+            ax2.tick_params(axis='y', labelcolor='blue')
+            
+            # Título y leyenda unificada
+            plt.title(f'Evolución de "{song}" en Spotify\nÚltima actualización: {datetime.now().strftime("%Y-%m-%d %H:%M")}')
+            lines1, labels1 = ax1.get_legend_handles_labels()
+            lines2, labels2 = ax2.get_legend_handles_labels()
+            ax2.legend(lines1 + lines2, labels1 + labels2, loc='upper left')
+            
+            # Guardar siempre con el mismo nombre (sobrescribe)
+            plt.savefig('charts/song_evolution_current.png', dpi=150, bbox_inches='tight')
+            plt.close()
+            
+            print(f"Gráfico 1 actualizado: song_evolution_current.png")
+            print(f"Datos guardados en: {csv_filename}")
+        else:
+            print(f"No hay datos para '{song}'")
 
         # --- Gráfico 2: Top 10 canciones del día ---
         df_top10 = pd.read_sql("""
@@ -297,30 +289,35 @@ def generate_daily_charts():
         """, conn)
 
         if not df_top10.empty:
-            plt.figure(figsize=(10, 6))
+            plt.figure(figsize=(12, 7))
             bars = plt.barh(
-                df_top10['song'] + ' - ' + df_top10['artist'],                
+                df_top10['song'] + '\n' + df_top10['artist'],                
                 df_top10['streams'],
-                color='#1DB954'
+                color='#1DB954',
+                height=0.7
             )
             
             # Añadir etiquetas de valor
             for bar in bars:
                 width = bar.get_width()
                 plt.text(width, bar.get_y() + bar.get_height()/2, 
-                        f'{width:.1f}B', 
-                        ha='left', va='center')
+                        f'{width:.2f}B', 
+                        ha='left', va='center',
+                        fontsize=10)
             
-            plt.title(f'Top 10 Canciones en Spotify - {today}')
-            plt.xlabel('Streams (miles de millones)')
+            plt.title(f'Top 10 Canciones en Spotify\nActualizado: {datetime.now().strftime("%Y-%m-%d %H:%M")}', fontsize=14, pad=20)
+            plt.xlabel('Streams (miles de millones)', fontsize=12)
+            plt.xticks(fontsize=10)
+            plt.yticks(fontsize=10)
             plt.tight_layout()
-            plt.savefig(f'top10_songs_{today}.png', dpi=120)
+            plt.savefig(f'charts/top10_songs_{current_datetime}.png', dpi=150, bbox_inches='tight')
             plt.close()
 
-        print(f"Gráficos actualizados para {today}")
+        print(f"Gráficos actualizados generados en {current_datetime}")
 
     except Exception as e:
-        print(f"Error: {str(e)}")
+        print(f"Error generando gráficos: {str(e)}")
+        logging.error(f"Error generando gráficos: {str(e)}")
     finally:
         conn.close()
         
