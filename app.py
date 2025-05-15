@@ -108,6 +108,15 @@ def create_database():
         raise
 
 def scrape_spotify_records():
+    # Limpiar datos del día actual para evitar duplicados
+    engine = create_engine(DATABASE_URL)
+    with engine.connect() as conn:
+        conn.execute(text("""
+        DELETE FROM spotify_records 
+        WHERE scraping_date = :today
+        """), {'today': datetime.now().date().strftime('%Y-%m-%d')})
+        conn.commit()
+        
     """Función principal para hacer scraping de los records de Spotify"""
     logging.info(f"Iniciando scraping - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
@@ -279,8 +288,8 @@ def generate_daily_charts():
         if not df_top10.empty:
             plt.figure(figsize=(10, 6))
             bars = plt.barh(
-                df_top10['song'] + ' - ' + df_top10['artist'],
-                df_top10['streams'] / 1e9,
+                df_top10['song'] + ' - ' + df_top10['artist'],                
+                df_top10['streams'],
                 color='#1DB954'
             )
             
@@ -305,9 +314,19 @@ def generate_daily_charts():
         conn.close()
         
 def run_daily_task():
-    """Ejecuta las tareas diarias programadas"""
-    create_database()
-    scrape_spotify_records()
+    """Ejecuta las tareas diarias programadas con manejo de errores"""
+    try:
+        logging.info("="*50)
+        logging.info("Iniciando ejecución diaria")
+        
+        create_database()
+        scrape_spotify_records()
+        
+        logging.info("Ejecución completada exitosamente")
+        logging.info("="*50 + "\n")
+    except Exception as e:
+        logging.error(f"Error en la ejecución diaria: {str(e)}", exc_info=True)
+        raise
 
 if __name__ == "__main__":
     # Configurar el scheduler para ejecución diaria
