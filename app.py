@@ -227,8 +227,6 @@ def generate_daily_charts():
     try:
         conn = sqlite3.connect('spotify_records.db')
         current_datetime = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        
-        # --- Gráfico 1: Evolución de una canción del ranking ---
 
         # Crear carpeta para guardar los gráficos
         # Obtener el directorio actual del script
@@ -240,6 +238,7 @@ def generate_daily_charts():
         # Crear la carpeta si no existe
         ruta_carpeta.mkdir(exist_ok=True)
 
+        # --- Gráfico 1: Evolución de una canción del ranking ---
         #Canción
         song = 'Die With A Smile'
         
