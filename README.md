@@ -1,14 +1,14 @@
 # Spotify Records Scraper
 
-Un scraper que recopila datos de los récords de streaming de Spotify desde Wikipedia y genera visualizaciones.
+A scraper that collects data about Spotify streaming records from Wikipedia and generates visualizations.
 
-## Características principales
-- Extrae datos diarios de la tabla "Most-streamed songs" de Wikipedia
-- Almacena los datos en SQLite
-- Genera gráficos de evolución de canciones y top 10
-- Ejecución programada diaria
+## Key Features
+- Extracts daily data from the "Most-streamed songs" table on Wikipedia
+- Stores data in SQLite
+- Generates song trend charts and top 10 rankings
+- Scheduled daily execution
 
-## Estructura de la base de datos
+## Database Structure
 ```sql
 CREATE TABLE spotify_records (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,40 +25,40 @@ CREATE TABLE spotify_records (
 )
 ```
 
-## Cómo ejecutar
-### 1. Clona el repositorio:
+## How to Run
+### 1. Clone the repository:
 ```
 git clone https://github.com/aristi95/spotify-scraper.git
 cd spotify-scraper
 ```
 
-### 2. Instala las dependencias:
+### 2. Install dependencies:
 ```
 pip install -r requirements.txt
 ```
 
-### 3. Ejecuta el scraper:
+### 3. Run the scraper:
 ```
 python app.py
 ```
 
-## Configuración
-- Se ejecuta automáticamente cada día a las 15:00 (3 PM).
-También se puede configurar Task Scheduler de Windows para que ejecute el código cada cierto tiempo. 
+## Configuration
+- Automatically runs daily at 3:00 PM (15:00).
+You can also configure Windows Task Scheduler to run the code at specific intervals.
 
-- Gráficos generados:
-
+- Generated charts:
+  
 song_evolution_YYYY-MM-DD.png
 
 top10_songs_YYYY-MM-DD.png
 
 - Logs: spotify_scraper.log
 
-## Personalización
-Para cambiar la canción a monitorear:
+## Customization
+To change the song to monitor:
 
-- Edita app.py y busca la variable 'song' en la función 'generate_daily_charts'
+- Edit app.py and look for the 'song' variable in the 'generate_daily_charts' function
 
-- Reemplaza con el nombre de la canción que desees
+- Replace it with the name of the song you want to track
 
 
