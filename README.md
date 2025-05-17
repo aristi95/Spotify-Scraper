@@ -44,7 +44,7 @@ python app.py
 
 ## Configuration
 - Automatically runs daily at 3:00 PM (15:00).
-You can also configure Windows Task Scheduler to run the code at specific intervals.
+Can be also be configured in Windows Task Scheduler to run the code at specific intervals.
 
 - Generated charts:
   
